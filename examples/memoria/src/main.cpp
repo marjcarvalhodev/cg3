@@ -28,53 +28,52 @@ int main() {
     bool running = true;
 
     AssetsManager assetsManager;
-    // assetsManager.loadTextures();
+    assetsManager.loadTextures();
+    assetsManager.loadModel("ballModel", "ball");
+    assetsManager.loadModel("diamondModel", "diamond");
+    assetsManager.loadShader("basicShader", "basic");
+    assetsManager.loadShader("phongShader", "phong");
+    assetsManager.loadShader("glassShader", "glass");
 
-    // assetsManager.loadModel("ballModel", "ball");
-    // std::shared_ptr<MyMesh> ballMesh = assetsManager.getModel("ballModel");
+    std::shared_ptr<MyMesh> ballMesh = assetsManager.getModel("ballModel");
+    std::shared_ptr<MyMesh> diamondMesh =
+        assetsManager.getModel("diamondModel");
+    std::shared_ptr<MyShader> basic_shader =
+        assetsManager.getShader("basicShader");
+    std::shared_ptr<MyShader> phong_shader =
+        assetsManager.getShader("phongShader");
+    std::shared_ptr<MyShader> glass_shader =
+        assetsManager.getShader("glassShader");
+    GLuint woodTextureId = assetsManager.getTexture("tree-bark.jpg");
 
-    // assetsManager.loadModel("diamondModel", "diamond");
-    // std::shared_ptr<MyMesh> diamondMesh =
-    //     assetsManager.getModel("diamondModel");
+    Material mat = {{0.5, 0.3, 0.36}, 50.0};
 
-    // assetsManager.loadShader("basicShader", "basic");
-    // std::shared_ptr<MyShader> basic_shader =
-    //     assetsManager.getShader("basicShader");
+    std::shared_ptr<MyObject> wood_ball =
+        std::make_shared<MyObject>(ballMesh, mat, basic_shader, false);
+    std::shared_ptr<MyObject> normal_ball =
+        std::make_shared<MyObject>(ballMesh, mat, basic_shader, false);
+    std::shared_ptr<MyObject> shiny_diamond =
+        std::make_shared<MyObject>(diamondMesh, mat, basic_shader, false);
+    std::shared_ptr<MyObject> rough_glass =
+        std::make_shared<MyObject>(diamondMesh, mat, basic_shader, false);
 
-    // assetsManager.loadShader("phongShader", "phong");
-    // std::shared_ptr<MyShader> phong_shader =
-    // assetsManager.getShader("phongShader");
-
-    // assetsManager.loadShader("glassShader", "glass");
-    // std::shared_ptr<MyShader> glass_shader =
-    // assetsManager.getShader("glassShader");
-
-    // Material mat = {{0.5, 0.3, 0.36}, 50.0};
-
-    // GLuint woodTextureId = assetsManager.getTexture("tree-bark.jpg");
-
-    // std::shared_ptr<MyObject> wood_ball =
-    //     std::make_shared<MyObject>(ballMesh, mat, basic_shader, false);
-    // std::shared_ptr<MyObject> normal_ball =
-    //     std::make_shared<MyObject>(ballMesh, mat, basic_shader, false);
-    // std::shared_ptr<MyObject> shiny_diamond =
-    //     std::make_shared<MyObject>(diamondMesh, mat, basic_shader, false);
-    // std::shared_ptr<MyObject> rough_glass =
-    //     std::make_shared<MyObject>(diamondMesh, mat, basic_shader, false);
+    wood_ball->repositionObject({-2.0, 0.0, -2.0});
+    normal_ball->repositionObject({-2.0, 0.0, 2.0});
+    shiny_diamond->repositionObject({2.0, 0.0, 2.0});
+    rough_glass->repositionObject({2.0, 0.0, -2.0});
 
     MyScene main_scene(camera);
 
-    // wood_ball->repositionObject({-2.0, 0.0, -2.0});
-    // normal_ball->repositionObject({-2.0, 0.0, 2.0});
-    // shiny_diamond->repositionObject({2.0, 0.0, 2.0});
-    // rough_glass->repositionObject({2.0, 0.0, -2.0});
+    main_scene.addSceneShaders("basicShader", basic_shader);
+    main_scene.addSceneShaders("phongShader", phong_shader);
+    main_scene.addSceneShaders("glassShader", glass_shader);
 
-    // main_scene.addSceneObjects("wood_ball", wood_ball);
-    // main_scene.addSceneObjects("normal_ball", normal_ball);
-    // main_scene.addSceneObjects("shiny_diamond", shiny_diamond);
-    // main_scene.addSceneObjects("rough_glass", rough_glass);
+    main_scene.addSceneObjects("wood_ball", wood_ball);
+    main_scene.addSceneObjects("normal_ball", normal_ball);
+    main_scene.addSceneObjects("shiny_diamond", shiny_diamond);
+    main_scene.addSceneObjects("rough_glass", rough_glass);
 
-    // float lastTime = SDL_GetTicks() / 1000.0f;
+    float lastTime = SDL_GetTicks() / 1000.0f;
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop_arg(
@@ -89,15 +88,15 @@ int main() {
       const int frameDelay = 16; // Approx 60 FPS (1000ms / 60)
       SDL_Delay(frameDelay);
 
-    //   float currentTime = SDL_GetTicks() / 1000.0f; // Current time in seconds
-    //   float deltaTime = currentTime - lastTime; // Time elapsed since last frame
-    //   lastTime = currentTime;
+      float currentTime = SDL_GetTicks() / 1000.0f; // Current time in seconds
+      float deltaTime = currentTime - lastTime; // Time elapsed since last frame
+      lastTime = currentTime;
 
-    //   handleInput(event, running);
+      handleInput(event, running);
 
-      //   for (const auto &[key, object] : main_scene.getAllSceneObjects()) {
-      //     main_scene.animateObject(object, deltaTime);
-      //   }
+      for (const auto &[key, object] : main_scene.getAllSceneObjects()) {
+        main_scene.animateObject(object, deltaTime);
+      }
 
       main_scene.renderScene(window);
     }
