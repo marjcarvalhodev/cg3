@@ -9,7 +9,7 @@ TextureLoader::~TextureLoader()
 {
 }
 
-GLuint TextureLoader::loadTextureFromFile(const std::string &textureName) {
+GLuint TextureLoader::loadTextureFromFile(const std::string &texturePath) {
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -17,8 +17,9 @@ GLuint TextureLoader::loadTextureFromFile(const std::string &textureName) {
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
 
-    std::string path = "assets/textures/" + textureName;
-    unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    // std::string path = basePath + "/textures/" + textureName;
+    std::cout << "Attempting to load texture from: " << texturePath << std::endl;
+    unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
 
     if (data) {
         GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
@@ -33,8 +34,10 @@ GLuint TextureLoader::loadTextureFromFile(const std::string &textureName) {
 
         stbi_image_free(data);
     } else {
-        std::cerr << "Failed to load texture: " << path << std::endl;
+        std::cerr << "Failed to load texture: " << texturePath << std::endl;
     }
 
     return textureID;
 }
+
+// eof

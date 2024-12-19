@@ -29,7 +29,8 @@ int main()
         SDL_Event event;
         bool running = true;
 
-        AssetsManager assetsManager("assets");
+        AssetsManager assetsManager;
+        assetsManager.loadTextures();
 
         assetsManager.loadModel("ballModel", "ball");
         std::shared_ptr<MyMesh> ballMesh = assetsManager.getModel("ballModel");
@@ -40,35 +41,32 @@ int main()
         assetsManager.loadShader("basicShader", "basic");
         std::shared_ptr<MyShader> basic_shader = assetsManager.getShader("basicShader");
 
-        // assetsManager.loadShader("phongShader", "phong");
-        // std::shared_ptr<MyShader> phong_shader = assetsManager.getShader("phongShader");
+        assetsManager.loadShader("phongShader", "phong");
+        std::shared_ptr<MyShader> phong_shader = assetsManager.getShader("phongShader");
 
-        // assetsManager.loadShader("glassShader", "glass");
-        // std::shared_ptr<MyShader> glass_shader = assetsManager.getShader("glassShader");
-
-
+        assetsManager.loadShader("glassShader", "glass");
+        std::shared_ptr<MyShader> glass_shader = assetsManager.getShader("glassShader");
 
         Material mat = {{0.5, 0.3, 0.36}, 50.0};
-
-        std::shared_ptr<MyObject> wood_ball = std::make_shared<MyObject>(ballMesh, mat, basic_shader, false);
         
-        // std::shared_ptr<MyObject> shiny_ball_1 = std::make_shared<MyObject>(ballMesh, mat, basic_shader);
-        // std::shared_ptr<MyObject> shiny_diamond_1 = std::make_shared<MyObject>(diamondMesh, mat, basic_shader, true);
-        // std::shared_ptr<MyObject> shiny_diamond_2 = std::make_shared<MyObject>(diamondMesh, mat, basic_shader, true);
+        GLuint woodTextureId = assetsManager.getTexture("tree-bark.jpg");
+
+        std::shared_ptr<MyObject> wood_ball = std::make_shared<MyObject>(ballMesh, mat, basic_shader, false, woodTextureId);
+        std::shared_ptr<MyObject> normal_ball = std::make_shared<MyObject>(ballMesh, mat, phong_shader, false);
+        std::shared_ptr<MyObject> shiny_diamond = std::make_shared<MyObject>(diamondMesh, mat, glass_shader, true);
+        std::shared_ptr<MyObject> rough_glass = std::make_shared<MyObject>(diamondMesh, mat, glass_shader, false, woodTextureId);
 
         MyScene main_scene(camera);
 
         wood_ball->repositionObject({-2.0, 0.0, -2.0});
-
-        // shiny_ball_1->repositionObject({-2.0, 0.0, 2.0});
-        // shiny_diamond_1->repositionObject({2.0, 0.0, 2.0});
-        // shiny_diamond_2->repositionObject({2.0, 0.0, -2.0});
+        normal_ball->repositionObject({-2.0, 0.0, 2.0});
+        shiny_diamond->repositionObject({2.0, 0.0, 2.0});
+        rough_glass->repositionObject({2.0, 0.0, -2.0});
 
         main_scene.addSceneObjects("shiny_ball_2", wood_ball);
-
-        // main_scene.addSceneObjects("shiny_ball_1", shiny_ball_1);
-        // main_scene.addSceneObjects("shiny_diamond_1", shiny_diamond_1);
-        // main_scene.addSceneObjects("shiny_diamond_2", shiny_diamond_2);
+        main_scene.addSceneObjects("shiny_ball_1", normal_ball);
+        main_scene.addSceneObjects("shiny_diamond_1", shiny_diamond);
+        main_scene.addSceneObjects("shiny_diamond_2", rough_glass);
 
         float lastTime = SDL_GetTicks() / 1000.0f; // Initialize lastTime in seconds
 
@@ -80,10 +78,10 @@ int main()
 
             handleInput(event, running);
 
-            // for (const auto &[key, object] : main_scene.getAllSceneObjects())
-            // {
-            //     main_scene.animateObject(object, deltaTime);
-            // }
+            for (const auto &[key, object] : main_scene.getAllSceneObjects())
+            {
+                main_scene.animateObject(object, deltaTime);
+            }
 
             main_scene.renderScene(window);
         }

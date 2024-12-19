@@ -4,7 +4,7 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 #include <memory>
-#include "texture_loader.hpp"
+#include "assets_manager.hpp"
 
 class MyObject
 {
@@ -13,15 +13,14 @@ private:
     Material material;
     std::shared_ptr<MyShader> shader;
     glm::mat4 modelMatrix;
-    GLuint textureID;
-    std::string textureName;
+    GLuint textureId;
 
 public:
     bool isTransparent;
 
     MyObject(
         std::shared_ptr<MyMesh> mesh, const Material &material,
-        std::shared_ptr<MyShader> shader, bool isTransparent = false, std::string textureName = "");
+        std::shared_ptr<MyShader> shader, bool isTransparent = false, GLuint textureId = 0);
 
     ~MyObject();
 
@@ -34,8 +33,6 @@ public:
     void repositionObject(glm::vec3 newPosition);
 
     void spin(glm::mat4 rotationMatrix) { setModelMatrix(rotationMatrix * modelMatrix); }
-
-    void setTextureID(std::string &textureName);
 };
 
 #endif
