@@ -49,13 +49,13 @@ int main() {
     Material mat = {{0.5, 0.3, 0.36}, 50.0};
 
     std::shared_ptr<MyObject> wood_ball =
-        std::make_shared<MyObject>(ballMesh, mat, basic_shader, false);
+        std::make_shared<MyObject>(ballMesh, mat, basic_shader, false, woodTextureId);
     std::shared_ptr<MyObject> normal_ball =
         std::make_shared<MyObject>(ballMesh, mat, basic_shader, false);
     std::shared_ptr<MyObject> shiny_diamond =
-        std::make_shared<MyObject>(diamondMesh, mat, basic_shader, false);
+        std::make_shared<MyObject>(diamondMesh, mat, glass_shader, true);
     std::shared_ptr<MyObject> rough_glass =
-        std::make_shared<MyObject>(diamondMesh, mat, basic_shader, false);
+        std::make_shared<MyObject>(diamondMesh, mat, glass_shader, false);
 
     wood_ball->repositionObject({-2.0, 0.0, -2.0});
     normal_ball->repositionObject({-2.0, 0.0, 2.0});

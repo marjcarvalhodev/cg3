@@ -12,24 +12,26 @@ MyObject::~MyObject() {}
 void MyObject::render(const glm::mat4 &view, const glm::mat4 &projection,
                       const glm::vec3 &cameraPos) {
 
-  glm::vec3 lightPos, lightColor = glm::vec3(1.0f);
+  glm::vec3 lightPos = glm::vec3(5.0f, 10.0f, 5.0f); // A light above the scene
+  glm::vec3 lightColor = glm::vec3(1.0f);            // White light
 
   shader->use();
-  shader->updateShader(modelMatrix, view, projection,
-                       lightPos, cameraPos, lightColor);
+  shader->updateShader(modelMatrix, view, projection, lightPos, cameraPos,
+                       lightColor);
 
   // Bind texture if available
   if (textureId) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
-    glUniform1i(glGetUniformLocation(shader->getProgramID(), "uTexture"), 0);
+    shader->setUniform("uTexture", 0);
+    shader->setUniform("hasTexture", true);
+  } else {
+    shader->setUniform("hasTexture", false);
   }
 
   // Set material properties
-  glUniform3fv(glGetUniformLocation(shader->getProgramID(), "materialColor"), 1,
-               glm::value_ptr(material.color));
-  glUniform1f(glGetUniformLocation(shader->getProgramID(), "materialShininess"),
-              material.shininess);
+  shader->setUniform("materialColor", material.color);
+  shader->setUniform("materialShininess", material.shininess);
 
   // Bind and draw the mesh
   mesh->bind();

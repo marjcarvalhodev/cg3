@@ -15,11 +15,19 @@ void MyScene::animateObject(std::shared_ptr<MyObject> object, float deltaTime) {
 void MyScene::renderScene(MyWindow &window) const {
   window.clearBuffers();
 
-  glm::vec3 lightColor = glm::vec3(1.0f);
+  // Define global light properties
+  glm::vec3 globalLightPos = glm::vec3(5.0f, 10.0f, 5.0f);
+  glm::vec3 globalLightColor = glm::vec3(1.0f);
 
+  // Update global uniforms in all shaders
   for (const auto &[key, shader] : scene_shaders) {
-    shader->updateGlobalUniforms(camera.getViewMatrix(), camera.getProjectionMatrix(), camera.getPosition(),
-                                 lightColor);
+    shader->updateGlobalUniforms(camera.getViewMatrix(),
+                                 camera.getProjectionMatrix(),
+                                 camera.getPosition(), globalLightColor);
+
+    shader->setUniform("lightPos", globalLightPos); // Update global light
+    shader->setUniform("ambientStrength", 0.5f);  // Adjust as needed
+    shader->setUniform("specularStrength", 0.5f); // Adjust as needed
   }
 
   // Step 1: Render opaque objects

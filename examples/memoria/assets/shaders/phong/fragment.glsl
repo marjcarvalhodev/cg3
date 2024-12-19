@@ -1,37 +1,68 @@
 #version 330 core
 
-uniform vec3 lightPos;
-
-in vec3 FragPos; // From vertex shader
-in vec3 Normal;  // From vertex shader
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
-// Hardcoded lighting
-void main() {
-    vec3 viewPos = vec3(0.0, 0.0, 5.0);   // Camera position
-    vec3 lightColor = vec3(1.0, 1.0, 1.0);
-    vec3 objectColor = vec3(0.2, 0.5, 0.8);
+#define MAX_LIGHTS 4
 
-    // Ambient lighting
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * lightColor;
+uniform vec3 lightPos[MAX_LIGHTS];
+uniform vec3 lightColor[MAX_LIGHTS];
+uniform int numLights;
 
-    // Diffuse lighting
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos);
+uniform vec3 viewPos;
+uniform vec3 materialColor;
+uniform float materialShininess;
+uniform float ambientStrength;
+uniform float specularStrength;
+
+uniform sampler2D uTexture;
+uniform bool hasTexture;
+
+vec3 CalcAmbient(vec3 lightColor, float ambientStrength) {
+    return ambientStrength * lightColor;
+}
+
+vec3 CalcDiffuse(vec3 norm, vec3 lightDir, vec3 lightColor) {
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
+    return diff * lightColor;
+}
 
-    // Specular lighting
-    vec3 viewDir = normalize(viewPos - FragPos);
+vec3 CalcSpecular(vec3 norm, vec3 lightDir, vec3 viewDir, vec3 lightColor, float specularStrength, float shininess) {
     vec3 reflectDir = reflect(-lightDir, norm);
-    float specularStrength = 0.5;
-    float shininess = 32.0;
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    vec3 specular = specularStrength * spec * lightColor;
+    return specularStrength * spec * lightColor;
+}
 
-    // Combine results
-    vec3 result = (ambient + diffuse + specular) * objectColor;
+vec3 GetBaseColor(bool hasTexture, sampler2D textureSampler, vec2 texCoords, vec3 materialColor) {
+    if (hasTexture) {
+        return texture(textureSampler, texCoords).rgb * materialColor;
+    } else {
+        return materialColor;
+    }
+}
+
+void main() {
+    vec3 norm = normalize(Normal);
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 baseColor = GetBaseColor(hasTexture, uTexture, TexCoords, materialColor);
+
+    vec3 result = vec3(0.0);
+
+    // for (int i = 0; i < numLights; ++i) {
+        vec3 lightDir = normalize(lightPos[0] - FragPos);
+
+        vec3 lightColorI = lightColor[0];
+
+        vec3 ambient = CalcAmbient(lightColorI, ambientStrength);
+        vec3 diffuse = CalcDiffuse(norm, lightDir, lightColorI);
+        vec3 specular = CalcSpecular(norm, lightDir, viewDir, lightColorI, specularStrength, materialShininess);
+
+        result += (ambient + diffuse + specular);
+    // }
+
+    result *= baseColor;
     FragColor = vec4(result, 1.0);
 }
