@@ -91,7 +91,7 @@ void AssetsManager::loadShader(const std::string &key,
   shaders[key] = std::make_shared<MyShader>(sources);
 }
 
-void AssetsManager::loadTextures() {
+void AssetsManager::preloadAllTextures() {
   std::string texturesPath = basePath + "/textures/";
 
   for (const auto &entry : fs::directory_iterator(texturesPath)) {

@@ -1,12 +1,12 @@
 #ifndef ASSETS_MANAGER_HPP
 #define ASSETS_MANAGER_HPP
 
+#include "mesh.hpp"
+#include "shader.hpp"
 #include "texture_loader.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <mesh.hpp>
-#include <shader.hpp>
 #include <sstream>
 #include <unordered_map>
 // #include <format>
@@ -45,7 +45,7 @@ public:
 
   Material getMaterial(const std::string &key) { return materials.at(key); }
 
-  void loadTextures();
+  void preloadAllTextures();
 
   GLuint getTexture(const std::string &textureName) {
     return textures.at(textureName);

@@ -1,29 +1,40 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include <iostream>
+#include "camera.hpp"
+#include "factories.hpp"
+#include "grid.hpp"
+#include "mesh.hpp"
+#include "object.hpp"
+#include "shader.hpp"
+#include "window.hpp"
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "camera.hpp"
-#include "window.hpp"
-#include "object.hpp"
-#include "shader.hpp"
-
-// // Forward declarations to prevent circular dependencies
-// class MyObject;
-// class MyShader;
 
 class MyScene {
 private:
   std::unordered_map<std::string, std::shared_ptr<MyShader>> scene_shaders;
   std::unordered_map<std::string, std::shared_ptr<MyObject>> scene_objects;
+  std::unordered_map<std::string, std::shared_ptr<MyMesh>> scene_meshes;
   MyCamera camera;
+  GameGrid grid;
+
+  GLuint gridVAO = 0, gridVBO = 0;
+  int gridVertexCount = 0;
+
+  // Initializer Functions
+  void initializeShaders(AssetsManager &assetsManager);
+  void initializeModels(AssetsManager &assetsManager);
+  void initializeObjects(AssetsManager &assetsManager);
 
 public:
-  MyScene(const MyCamera &camera);
+  MyScene(const MyCamera &camera, const GameGrid &grid);
   ~MyScene();
+
+  static MyScene setupScene(MyCamera &camera, AssetsManager &assetsManager);
 
   void addSceneObjects(const std::string &key,
                        const std::shared_ptr<MyObject> &object) {
@@ -59,6 +70,18 @@ public:
     throw std::runtime_error("Scene object not found: " + key);
   }
 
+  void addSceneMeshes(const std::string &key,
+                       const std::shared_ptr<MyMesh> &mesh) {
+    scene_meshes[key] = mesh;
+  }
+
+  std::shared_ptr<MyMesh> getSceneMesh(const std::string &key) const {
+    auto it = scene_meshes.find(key);
+    if (it != scene_meshes.end())
+      return it->second;
+    throw std::runtime_error("Scene mesh not found: " + key);
+  }
+
   void animateObject(std::shared_ptr<MyObject> object, float deltaTime);
 
   void renderScene(MyWindow &window) const;
@@ -71,14 +94,14 @@ public:
   }
 
   void handleSpacePress() {
-    std::cout << "Space bar pressed: Perform action (e.g., jump, interact)" << std::endl;
+    // std::cout << "Space bar pressed:" << std::endl;
     // Add game logic here
   }
 
   void handleEnterPress() {
-    std::cout << "Enter key pressed: Perform action (e.g., confirm, start game)" << std::endl;
+    // std::cout << "Enter key pressed:" << std::endl;
     // Add game logic here
   }
 };
 
-#endif
+#endif // SCENE_HPP

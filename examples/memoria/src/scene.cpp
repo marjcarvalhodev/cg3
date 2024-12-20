@@ -1,8 +1,21 @@
 #include "scene.hpp"
+#include <iostream>
 
-MyScene::MyScene(const MyCamera &camera) : camera(camera) {}
+MyScene::MyScene(const MyCamera &camera, const GameGrid &grid)
+    : camera(camera), grid(grid) {}
 
 MyScene::~MyScene() {}
+
+MyScene MyScene::setupScene(MyCamera &camera, AssetsManager &assetsManager) {
+  GameGrid gameGrid(4, 2.0); // 4x4 grid, 2.0f cell size
+  MyScene scene(camera, gameGrid);
+
+  scene.initializeShaders(assetsManager);
+  scene.initializeModels(assetsManager);
+  scene.initializeObjects(assetsManager);
+
+  return scene;
+}
 
 void MyScene::animateObject(std::shared_ptr<MyObject> object, float deltaTime) {
   float angle =
@@ -76,15 +89,134 @@ void MyScene::renderScene(MyWindow &window) const {
 void MyScene::handleMouseClick(int mouseX, int mouseY, const MyCamera &camera,
                                int windowWidth, int windowHeight) {
   glm::vec3 rayOrigin = camera.getPosition();
-  glm::vec3 rayDir = calculateRayDirection(
-      mouseX, mouseY,windowWidth, windowHeight, camera.getViewMatrix(), camera.getProjectionMatrix());
+  glm::vec3 rayDir = calculateRayDirection(mouseX, mouseY, windowWidth,
+                                           windowHeight, camera.getViewMatrix(),
+                                           camera.getProjectionMatrix());
 
-  for (const auto &[key, object] : scene_objects) {
-    if (object->intersectsRay(rayOrigin, rayDir)) {
-      std::cout << "Clicked on object: " << key << std::endl;
-      object->onClick(); // Call object-specific logic
+  glm::vec2 hitCell;
+  bool hit = grid.intersectsRay(rayOrigin, rayDir, hitCell, 1.0);
+
+  if (hit) {
+    std::cout << "Hit cell: (" << hitCell.x << ", " << hitCell.y << ")"
+              << std::endl;
+    int cellValue =
+        grid.getCell(static_cast<int>(hitCell.x), static_cast<int>(hitCell.y));
+    if (cellValue == 1) {
+      std::cout << "Hit wood_ball!" << std::endl;
     }
   }
+  // for (const auto &[key, object] : scene_objects) {
+  //   if (object->intersectsRay(rayOrigin, rayDir)) {
+  //     std::cout << "Clicked on object: " << key << std::endl;
+  //     object->onClick(); // Call object-specific logic
+  //   }
+  // }
+}
+
+void MyScene::initializeShaders(AssetsManager &assetsManager) {
+
+  std::cout << "initializeShaders: inicio" << std::endl;
+  std::vector<std::string> shaderNames = {"phong", "glass", "fog"};
+
+  for (const auto &name : shaderNames) {
+    loadAndRegisterShader(assetsManager, name);
+    std::string shaderName = name + "Shader";
+    std::shared_ptr<MyShader> shader = assetsManager.getShader(shaderName);
+    addSceneShaders(shaderName, shader);
+  }
+
+  // auto fogShader = assetsManager.getShader("fogShader");
+  // fogShader->setUniform("fogStart", 5.0f);
+  // fogShader->setUniform("fogEnd", 20.0f);
+  // fogShader->setUniform("fogColor", glm::vec3(0.5f, 0.5f, 0.5f));
+
+  std::cout << "initializeShaders: fim" << std::endl;
+}
+
+void MyScene::initializeModels(AssetsManager &assetsManager) {
+  std::cout << "initializeModels: inicio" << std::endl;
+  std::vector<std::string> modelNames = {"ball", "diamond"};
+  for (const auto &name : modelNames) {
+    std::shared_ptr<MyMesh> mesh = createMeshFromModel(assetsManager, name);
+    addSceneMeshes(name, mesh);
+  }
+  std::cout << "initializeModels: inicio" << std::endl;
+  // MeshData floorMeshData = createMeshDataFromVertices(floorVertices);
+  // meshes["floor"] = std::make_shared<MyMesh>(floorMeshData);
+}
+
+void MyScene::initializeObjects(AssetsManager &assetsManager) {
+  std::cout << "initializeObjects: inicio" << std::endl;
+
+  auto phongShader = getSceneShader("phongShader");
+  auto glassShader = getSceneShader("glassShader");
+  std::cout << "initializeObjects: pegou shaders" << std::endl;
+
+  assetsManager.preloadAllTextures();
+  std::cout << "initializeObjects: carregou texturas" << std::endl;
+
+  GLuint woodTextureId = assetsManager.getTexture("tree-bark.jpg");
+  GLuint floorTextureId = assetsManager.getTexture("floor.jpg");
+  std::cout << "initializeObjects: pegou texturas" << std::endl;
+
+  Material floorMaterial = {{0.6f, 0.6f, 0.6f}, 32.0f};
+  Material mat = {{0.5, 0.3, 0.36}, 50.0};
+
+  std::vector<
+      std::tuple<std::string, glm::vec3, std::shared_ptr<MyMesh>, Material,
+                 std::shared_ptr<MyShader>, bool, GLuint, int>>
+      objects = {
+          {"wood_ball",
+           {-2.0f, 0.0f, -2.0f},
+           getSceneMesh("ball"),
+           mat,
+           phongShader,
+           false,
+           woodTextureId,
+           GL_TRIANGLES},
+          {"normal_ball",
+           {-2.0f, 0.0f, 2.0f},
+           getSceneMesh("ball"),
+           mat,
+           phongShader,
+           false,
+           0,
+           GL_TRIANGLES},
+          {"shiny_diamond",
+           {2.0f, 0.0f, 2.0f},
+           getSceneMesh("diamond"),
+           mat,
+           glassShader,
+           true,
+           0,
+           GL_TRIANGLES},
+          {"rough_glass",
+           {2.0f, 0.0f, -2.0f},
+           getSceneMesh("diamond"),
+           mat,
+           glassShader,
+           false,
+           0,
+           GL_TRIANGLES}
+          //  {"floor",
+          //   {0.0f, 0.0f, 0.0f},
+          //   meshes.at("floor"),
+          //   floorMaterial,
+          //   phongShader,
+          //   false,
+          //   floorTextureId,
+          //   GL_TRIANGLES}
+      };
+
+  for (const auto &[name, position, mesh, material, shader, isTransparent,
+                    textureId, drawType] : objects) {
+    auto object = createObject(mesh, material, shader, isTransparent, textureId,
+                               drawType);
+    object->repositionObject(position);
+    addSceneObjects(name, object);
+  }
+
+  std::cout << "initializeObjects: fim" << std::endl;
 }
 
 // eof

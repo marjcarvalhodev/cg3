@@ -1,20 +1,21 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#include <memory>
-#include <iostream>
 #include "assets_manager.hpp"
 #include "camera.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include <iostream>
+#include <memory>
 
 class MyObject {
 private:
   std::shared_ptr<MyMesh> mesh;
   Material material;
   std::shared_ptr<MyShader> shader;
-  glm::mat4 modelMatrix;
   GLuint textureId;
+  int drawType;
+  glm::mat4 modelMatrix;
   glm::vec3 boundingBoxMin;
   glm::vec3 boundingBoxMax;
   void updateBoundingBox(const glm::vec3 &meshMin, const glm::vec3 &meshMax);
@@ -24,9 +25,12 @@ public:
 
   MyObject(std::shared_ptr<MyMesh> mesh, const Material &material,
            std::shared_ptr<MyShader> shader, bool isTransparent = false,
-           GLuint textureId = 0);
+           GLuint textureId = 0, int drawType = GL_TRIANGLES);
 
   ~MyObject();
+
+  // void render(const glm::mat4 &view, const glm::mat4 &projection,
+  //             const glm::vec3 &cameraPos);
 
   void render(const glm::mat4 &view, const glm::mat4 &projection,
               const glm::vec3 &cameraPos);

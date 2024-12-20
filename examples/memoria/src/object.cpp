@@ -2,10 +2,10 @@
 
 MyObject::MyObject(std::shared_ptr<MyMesh> mesh, const Material &material,
                    std::shared_ptr<MyShader> shader, bool isTransparent,
-                   GLuint textureId)
+                   GLuint textureId, int drawType)
     : mesh(mesh), material(material), shader(shader),
       modelMatrix(glm::mat4(1.0f)), isTransparent(isTransparent),
-      textureId(textureId) {
+      textureId(textureId), drawType(drawType) {
 
   updateBoundingBox(mesh->getMinBounds(), mesh->getMaxBounds());
 }
@@ -38,7 +38,7 @@ void MyObject::render(const glm::mat4 &view, const glm::mat4 &projection,
 
   // Bind and draw the mesh
   mesh->bind();
-  glDrawArrays(GL_TRIANGLES, 0, mesh->getVertexCount());
+  glDrawArrays(drawType, 0, mesh->getVertexCount());
   mesh->unbind();
 }
 

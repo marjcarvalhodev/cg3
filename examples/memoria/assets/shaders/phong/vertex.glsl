@@ -14,7 +14,7 @@ uniform mat4 uProjection;
 uniform float uvScale;
 
 void main() {
-    TexCoords = aTexCoord * 1.0; // Pass the texture coordinates
+    TexCoords = aTexCoord * 4.0; // Pass the texture coordinates
     FragPos = vec3(uModel * vec4(aPos, 1.0));
     Normal = mat3(transpose(inverse(uModel))) * aNormal; // Transform normals
     gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0);
