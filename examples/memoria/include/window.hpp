@@ -22,6 +22,8 @@ public:
 
     ~MyWindow();
 
+    SDL_Window *getSDLWindow() const { return window; }
+
     bool init();
 
     void setClearColor();

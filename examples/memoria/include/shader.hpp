@@ -47,7 +47,7 @@ public:
                     const glm::mat4 &projMat, const glm::vec3 &lightPos,
                     const glm::vec3 &cameraPos, const glm::vec3 &lightColorVec);
 
-  void setTexture(const std::string &name, GLuint textureID, int textureUnit);
+  void setTexture(GLuint textureID, int textureUnit);
 
   // Set uniform values
   void setUniform(const std::string &name, const glm::mat4 &matrix) {

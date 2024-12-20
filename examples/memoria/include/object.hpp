@@ -1,10 +1,12 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include <memory>
+#include <iostream>
 #include "assets_manager.hpp"
+#include "camera.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
-#include <memory>
 
 class MyObject {
 private:
@@ -13,6 +15,9 @@ private:
   std::shared_ptr<MyShader> shader;
   glm::mat4 modelMatrix;
   GLuint textureId;
+  glm::vec3 boundingBoxMin;
+  glm::vec3 boundingBoxMax;
+  void updateBoundingBox(const glm::vec3 &meshMin, const glm::vec3 &meshMax);
 
 public:
   bool isTransparent;
@@ -35,6 +40,10 @@ public:
   void spin(glm::mat4 rotationMatrix) {
     setModelMatrix(rotationMatrix * modelMatrix);
   }
+
+  bool intersectsRay(const glm::vec3 &rayOrigin, const glm::vec3 &rayDir) const;
+
+  virtual void onClick() { std::cout << "Object clicked!" << std::endl; }
 };
 
 #endif

@@ -1,11 +1,13 @@
 #include "shader.hpp"
 
 MyShader::MyShader(ShaderSources sources)
-    : sources(sources), shaderProgram(0), vertexShader(0), fragmentShader(0) {
+    : shaderProgram(0), vertexShader(0), fragmentShader(0), VAO(0), VBO(0),
+      sources(sources) {
   // validateShader(sources.vertex, sources.fragment);
 
   vertexShader = compileShader(sources.vertex.c_str(), ShaderType::Vertex);
-  fragmentShader = compileShader(sources.fragment.c_str(), ShaderType::Fragment);
+  fragmentShader =
+      compileShader(sources.fragment.c_str(), ShaderType::Fragment);
 
   bindShaders();
 }
@@ -64,23 +66,26 @@ void MyShader::use() { glUseProgram(shaderProgram); }
 
 GLuint MyShader::getProgramID() const { return shaderProgram; }
 
-void MyShader::updateGlobalUniforms(const glm::mat4 &viewMat, const glm::mat4 &projMat,
-                                    const glm::vec3 &cameraPos, const glm::vec3 &lightColorVec) {
-    setUniform("uView", viewMat);
-    setUniform("uProjection", projMat);
-    setUniform("viewPos", cameraPos);
-    setUniform("lightColor", lightColorVec);
+void MyShader::updateGlobalUniforms(const glm::mat4 &viewMat,
+                                    const glm::mat4 &projMat,
+                                    const glm::vec3 &cameraPos,
+                                    const glm::vec3 &lightColorVec) {
+  setUniform("uView", viewMat);
+  setUniform("uProjection", projMat);
+  setUniform("viewPos", cameraPos);
+  setUniform("lightColor", lightColorVec);
 }
 
 void MyShader::updateShader(const glm::mat4 &modelMat, const glm::mat4 &viewMat,
                             const glm::mat4 &projMat, const glm::vec3 &lightPos,
-                            const glm::vec3 &cameraPos, const glm::vec3 &lightColorVec) {
-    setUniform("uModel", modelMat);
-    setUniform("uView", viewMat);
-    setUniform("uProjection", projMat);
-    setUniform("lightPos", lightPos);
-    setUniform("viewPos", cameraPos);
-    setUniform("lightColor", lightColorVec);
+                            const glm::vec3 &cameraPos,
+                            const glm::vec3 &lightColorVec) {
+  setUniform("uModel", modelMat);
+  setUniform("uView", viewMat);
+  setUniform("uProjection", projMat);
+  setUniform("lightPos", lightPos);
+  setUniform("viewPos", cameraPos);
+  setUniform("lightColor", lightColorVec);
 }
 
 void MyShader::validateShader(std::string vertexShaderSource,
@@ -104,8 +109,7 @@ void MyShader::validateShader(std::string vertexShaderSource,
   // print("Fragment Shader Source:\n", fragmentShaderSource);
 }
 
-void MyShader::setTexture(const std::string &name, GLuint textureID,
-                          int textureUnit) {
+void MyShader::setTexture(GLuint textureID, int textureUnit) {
   glActiveTexture(GL_TEXTURE0 + textureUnit);
   glBindTexture(GL_TEXTURE_2D, textureID);
   GLuint textureLoc = glGetUniformLocation(getProgramID(), "textureLoc");
@@ -113,21 +117,22 @@ void MyShader::setTexture(const std::string &name, GLuint textureID,
 }
 
 GLint MyShader::getUniformLocation(const std::string &name) {
-    // Check if the location is already cached
-    auto it = uniformLocations.find(name);
-    if (it != uniformLocations.end()) {
-        return it->second;
-    }
+  // Check if the location is already cached
+  auto it = uniformLocations.find(name);
+  if (it != uniformLocations.end()) {
+    return it->second;
+  }
 
-    // Query the uniform location
-    GLint location = glGetUniformLocation(shaderProgram, name.c_str());
-    if (location == -1) {
-        // std::cerr << "Warning: Uniform '" << name << "' not found in shader program!" << std::endl;
-    }
+  // Query the uniform location
+  GLint location = glGetUniformLocation(shaderProgram, name.c_str());
+  if (location == -1) {
+    // std::cerr << "Warning: Uniform '" << name << "' not found in shader
+    // program!" << std::endl;
+  }
 
-    // Cache the location
-    uniformLocations[name] = location;
-    return location;
+  // Cache the location
+  uniformLocations[name] = location;
+  return location;
 }
 
 // eof

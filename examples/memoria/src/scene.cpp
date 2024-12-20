@@ -26,8 +26,8 @@ void MyScene::renderScene(MyWindow &window) const {
                                  camera.getPosition(), globalLightColor);
 
     shader->setUniform("lightPos", globalLightPos); // Update global light
-    shader->setUniform("ambientStrength", 0.5f);  // Adjust as needed
-    shader->setUniform("specularStrength", 0.5f); // Adjust as needed
+    shader->setUniform("ambientStrength", 0.5f);    // Adjust as needed
+    shader->setUniform("specularStrength", 0.5f);   // Adjust as needed
   }
 
   // Step 1: Render opaque objects
@@ -71,6 +71,20 @@ void MyScene::renderScene(MyWindow &window) const {
   glDisable(GL_BLEND);
 
   window.swapBuffers();
+}
+
+void MyScene::handleMouseClick(int mouseX, int mouseY, const MyCamera &camera,
+                               int windowWidth, int windowHeight) {
+  glm::vec3 rayOrigin = camera.getPosition();
+  glm::vec3 rayDir = calculateRayDirection(
+      mouseX, mouseY,windowWidth, windowHeight, camera.getViewMatrix(), camera.getProjectionMatrix());
+
+  for (const auto &[key, object] : scene_objects) {
+    if (object->intersectsRay(rayOrigin, rayDir)) {
+      std::cout << "Clicked on object: " << key << std::endl;
+      object->onClick(); // Call object-specific logic
+    }
+  }
 }
 
 // eof
