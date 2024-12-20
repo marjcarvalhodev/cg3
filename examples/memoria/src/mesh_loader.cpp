@@ -52,6 +52,8 @@ MeshData MeshLoader::loadModel(const std::string &objPath)
                 meshData.texCoords.push_back(attrib.texcoords[2 * index.texcoord_index + 0]); // u
                 meshData.texCoords.push_back(attrib.texcoords[2 * index.texcoord_index + 1]); // v
             }
+
+            meshData.indices.push_back(meshData.indices.size());
         }
     }
 

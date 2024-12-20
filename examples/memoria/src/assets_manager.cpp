@@ -103,7 +103,8 @@ void AssetsManager::preloadAllTextures() {
       GLuint textureID = TextureLoader::loadTextureFromFile(filePath);
       textures[fileName] = textureID;
 
-      std::cout << "Loaded texture: " << fileName << " (ID: " << textureID << ")\n";
+      std::cout << "Loaded texture: " << fileName << " (ID: " << textureID
+                << ")\n";
     }
   }
 }

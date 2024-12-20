@@ -8,6 +8,8 @@ MyObject::MyObject(std::shared_ptr<MyMesh> mesh, const Material &material,
       textureId(textureId), drawType(drawType) {
 
   updateBoundingBox(mesh->getMinBounds(), mesh->getMaxBounds());
+
+  MeshData meshData
 }
 
 MyObject::~MyObject() {}
@@ -38,7 +40,7 @@ void MyObject::render(const glm::mat4 &view, const glm::mat4 &projection,
 
   // Bind and draw the mesh
   mesh->bind();
-  glDrawArrays(drawType, 0, mesh->getVertexCount());
+  glDrawElements(drawType, mesh->getIndexCount(), GL_UNSIGNED_INT, 0);
   mesh->unbind();
 }
 
@@ -77,7 +79,7 @@ bool MyObject::intersectsRay(const glm::vec3 &rayOrigin,
 void MyObject::updateBoundingBox(const glm::vec3 &meshMin,
                                  const glm::vec3 &meshMax) {
   // Transform the bounding box by the model matrix
-  glm::vec4 corners[8] = {
+  boundingBoxCorners = {
       glm::vec4(meshMin.x, meshMin.y, meshMin.z, 1.0f),
       glm::vec4(meshMin.x, meshMin.y, meshMax.z, 1.0f),
       glm::vec4(meshMin.x, meshMax.y, meshMin.z, 1.0f),
@@ -91,7 +93,7 @@ void MyObject::updateBoundingBox(const glm::vec3 &meshMin,
   glm::vec3 worldMin = glm::vec3(FLT_MAX);
   glm::vec3 worldMax = glm::vec3(-FLT_MAX);
 
-  for (const auto &corner : corners) {
+  for (const auto &corner : boundingBoxCorners) {
     glm::vec3 transformedCorner = glm::vec3(modelMatrix * corner);
     worldMin = glm::min(worldMin, transformedCorner);
     worldMax = glm::max(worldMax, transformedCorner);

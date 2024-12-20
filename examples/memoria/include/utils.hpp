@@ -1,12 +1,12 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include "grid.hpp"
+#include "mesh_loader.hpp"
 #include <glm/glm.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "mesh_loader.hpp"
-#include "grid.hpp"
 
 inline void printErr(const std::exception &e) {
   std::cerr << "Error: " << e.what() << std::endl;
@@ -92,6 +92,34 @@ inline MeshData createMeshDataFromVertices(const std::vector<float> &vertices) {
     meshData.texCoords.push_back(vertices[i + 6]);
     meshData.texCoords.push_back(vertices[i + 7]);
   }
+
+  return meshData;
+}
+
+inline MeshData createBoundingBoxMeshData(const glm::vec4 corners[8]) {
+  MeshData meshData;
+
+  // Add vertices
+  for (const auto &corner : corners) {
+    meshData.vertices.push_back(corner.x);
+    meshData.vertices.push_back(corner.y);
+    meshData.vertices.push_back(corner.z);
+
+    // Add dummy normals and tex coords (not used for lines)
+    meshData.normals.push_back(0.0f);
+    meshData.normals.push_back(0.0f);
+    meshData.normals.push_back(0.0f);
+
+    meshData.texCoords.push_back(0.0f);
+    meshData.texCoords.push_back(0.0f);
+  }
+
+  // Add indices for lines
+  meshData.indices = {
+      0, 1, 1, 5, 5, 4, 4, 0, // Bottom face
+      2, 3, 3, 7, 7, 6, 6, 2, // Top face
+      0, 2, 1, 3, 5, 7, 4, 6  // Vertical edges
+  };
 
   return meshData;
 }

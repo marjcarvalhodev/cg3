@@ -1,6 +1,7 @@
 #include "mesh.hpp"
 
-MyMesh::MyMesh(MeshData meshData) : vertexCount(meshData.vertices.size() / 3) {
+MyMesh::MyMesh(MeshData meshData)
+    : vertexCount(meshData.vertices.size() / 3), indexCount(0) {
   // Create and bind the VAO
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
@@ -41,6 +42,16 @@ MyMesh::MyMesh(MeshData meshData) : vertexCount(meshData.vertices.size() / 3) {
     glEnableVertexAttribArray(2);
   }
 
+  if (!meshData.indices.empty()) {
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 meshData.indices.size() * sizeof(unsigned int),
+                 meshData.indices.data(), GL_STATIC_DRAW);
+
+    indexCount = meshData.indices.size();
+  }
+
   // Unbind VAO and VBO
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
@@ -62,7 +73,7 @@ void MyMesh::setModelMatrix(const glm::mat4 &matrix) { modelMatrix = matrix; }
 
 void MyMesh::computeBounds(const std::vector<float> &vertices) {
   glm::vec3 min = glm::vec3(FLT_MAX);
-  glm::vec3 max = glm::vec3(FLT_MIN);
+  glm::vec3 max = glm::vec3(-FLT_MIN);
 
   for (size_t i = 0; i < vertices.size(); i += 3) {
     glm::vec3 vertex(vertices[i], vertices[i + 1], vertices[i + 2]);
@@ -74,4 +85,4 @@ void MyMesh::computeBounds(const std::vector<float> &vertices) {
   maxBounds = max;
 }
 
-//
+// eof

@@ -12,10 +12,11 @@ struct MeshData
     std::vector<float> vertices;
     std::vector<float> normals;
     std::vector<float> texCoords;
+    std::vector<unsigned int> indices;
 
     bool isEmpty() const
     {
-        return vertices.empty() && normals.empty() && texCoords.empty();
+        return vertices.empty() && normals.empty() && texCoords.empty() && indices.empty();
     }
 };
 

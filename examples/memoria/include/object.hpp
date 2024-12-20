@@ -7,10 +7,12 @@
 #include "shader.hpp"
 #include <iostream>
 #include <memory>
+#include <string>
 
 class MyObject {
 private:
   std::shared_ptr<MyMesh> mesh;
+  std::shared_ptr<MyMesh> meshBox;
   Material material;
   std::shared_ptr<MyShader> shader;
   GLuint textureId;
@@ -18,6 +20,8 @@ private:
   glm::mat4 modelMatrix;
   glm::vec3 boundingBoxMin;
   glm::vec3 boundingBoxMax;
+  std::vector<glm::vec4> boundingBoxCorners;
+  std::vector<float> boundingBoxVertices;
   void updateBoundingBox(const glm::vec3 &meshMin, const glm::vec3 &meshMax);
 
 public:

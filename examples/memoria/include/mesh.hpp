@@ -15,8 +15,8 @@ struct Material {
 
 class MyMesh {
 private:
-  GLuint VAO, VBO;
-  size_t vertexCount;
+  GLuint VAO, VBO, EBO;
+  size_t vertexCount, indexCount;
   glm::mat4 modelMatrix = glm::mat4(1.0f); // Identity matrix by default
   glm::vec3 minBounds;
   glm::vec3 maxBounds;
@@ -30,9 +30,11 @@ public:
   void bind() const;
   void unbind() const;
   size_t getVertexCount() const;
+  size_t getIndexCount() const { return indexCount; }
+
   const glm::mat4 &getModelMatrix() const;
   void setModelMatrix(const glm::mat4 &matrix);
-  
+
   glm::vec3 getMinBounds() const { return minBounds; }
   glm::vec3 getMaxBounds() const { return maxBounds; }
 };
