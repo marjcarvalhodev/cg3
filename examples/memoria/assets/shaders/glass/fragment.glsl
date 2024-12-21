@@ -10,6 +10,9 @@ uniform vec3 lightPos;    // Light position
 uniform vec3 lightColor;  // Light color
 uniform samplerCube environmentMap; // Optional environment map for reflections
 
+uniform vec3 materialColor;
+uniform float materialShininess;
+
 void main() {
     // Normals
     vec3 norm = normalize(Normal);
@@ -25,7 +28,7 @@ void main() {
     vec3 diffuse = diff * lightColor;
 
     // 3. Specular highlights (Phong reflection model)
-    float shininess = 128.0;
+    float shininess = materialShininess;//128.0;
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     vec3 specular = spec * lightColor;
@@ -39,7 +42,7 @@ void main() {
     float transparency = 0.5; // Controls glass transparency (0 = fully transparent, 1 = opaque)
 
     vec3 color = ambient + diffuse + specular + 0.5 * reflection; // Add reflections
-    color = mix(glassColor, color, 0.5); // Blend base glass color with lighting
+    color = mix(materialColor, color, 0.5); // Blend base glass color with lighting
 
     FragColor = vec4(color, transparency); // Final output with transparency
 }

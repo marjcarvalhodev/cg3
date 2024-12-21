@@ -9,12 +9,16 @@
 #include "object.hpp"
 #include "scene.hpp"
 
+#include <SDL_events.h>
+#include <SDL_keycode.h>
+#include <glm/fwd.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 void windowResize(SDL_Event &event, MyCamera &camera);
 MyCamera getDefaultCamera(const MyWindow &window);
-void handleInput(SDL_Event &event, bool &running);
+void handleInput(SDL_Event &event, bool &running, MyCamera &camera);
+void handleKey(int sym, bool &running, MyCamera &camera);
 
 int main()
 {
@@ -25,7 +29,7 @@ int main()
         {
             return 1;
         }
-        MyCamera camera = getDefaultCamera(window);
+        static MyCamera camera = getDefaultCamera(window);
         SDL_Event event;
         bool running = true;
 
@@ -47,14 +51,16 @@ int main()
         assetsManager.loadShader("glassShader", "glass");
         std::shared_ptr<MyShader> glass_shader = assetsManager.getShader("glassShader");
 
-        Material mat = {{0.5, 0.3, 0.36}, 50.0};
+        Material matRuby = {{0.7, 0.33, 0.33}, 150.0};
+        Material matMetal = {{0.33, 0.43, 0.53}, 300.0};
+        Material mat = {{0.5, 0.5, 0.5}, 50.0};
         
         GLuint woodTextureId = assetsManager.getTexture("tree-bark.jpg");
 
         std::shared_ptr<MyObject> wood_ball = std::make_shared<MyObject>(ballMesh, mat, basic_shader, false, woodTextureId);
         std::shared_ptr<MyObject> normal_ball = std::make_shared<MyObject>(ballMesh, mat, phong_shader, false);
-        std::shared_ptr<MyObject> shiny_diamond = std::make_shared<MyObject>(diamondMesh, mat, glass_shader, true);
-        std::shared_ptr<MyObject> rough_glass = std::make_shared<MyObject>(diamondMesh, mat, glass_shader, false, woodTextureId);
+        std::shared_ptr<MyObject> shiny_diamond = std::make_shared<MyObject>(diamondMesh, matRuby, glass_shader, true);
+        std::shared_ptr<MyObject> rough_glass = std::make_shared<MyObject>(diamondMesh, matMetal, glass_shader, false, woodTextureId);
 
         MyScene main_scene(camera);
 
@@ -76,7 +82,7 @@ int main()
             float deltaTime = currentTime - lastTime;     // Time elapsed since last frame
             lastTime = currentTime;
 
-            handleInput(event, running);
+            handleInput(event, running, camera);
 
             for (const auto &[key, object] : main_scene.getAllSceneObjects())
             {
@@ -117,14 +123,29 @@ void windowResize(SDL_Event &event, MyCamera &camera)
     camera.updateProjectionMatrix();
 }
 
-void handleInput(SDL_Event &event, bool &running)
+void handleInput(SDL_Event &event, bool &running, MyCamera &camera)
 {
     while (SDL_PollEvent(&event))
     {
-        if (event.type == SDL_QUIT)
-        {
-            running = false;
+        switch (event.type) {
+            case SDL_KEYDOWN: handleKey(event.key.keysym.sym, running, camera);
+                break;
+            case SDL_QUIT: running = false;
+                break;
         }
+    }
+}
+
+void handleKey(int sym, bool &running, MyCamera &camera)
+{
+    switch (sym) {
+        case SDLK_ESCAPE: running = false;
+            break;
+        case SDLK_w: camera.setPosition(glm::vec3(0.0f,1.0f,0.0f));
+            break;
+        case SDLK_a: break;
+        case SDLK_s: break;
+        case SDLK_d: break;
     }
 }
 

@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "utils.hpp"
 
 MyCamera::MyCamera(const glm::vec3 &pos, const glm::vec3 &tgt, const glm::vec3 &upDir, float aspect)
     : position(pos), target(tgt), up(upDir), fov(45.0f), aspectRatio(aspect), nearPlane(0.1f), farPlane(100.0f)
@@ -10,6 +11,8 @@ MyCamera::MyCamera(const glm::vec3 &pos, const glm::vec3 &tgt, const glm::vec3 &
 void MyCamera::updateViewMatrix()
 {
     viewMatrix = glm::lookAt(position, target, up);
+    print("updateViewMatrix position: ",viewMatrix[0].x,viewMatrix[0].y,viewMatrix[0].z);
+
 }
 
 void MyCamera::updateProjectionMatrix()
@@ -29,7 +32,9 @@ const glm::mat4 &MyCamera::getProjectionMatrix() const
 
 void MyCamera::setPosition(const glm::vec3& newValue)
 {
-    position = newValue;
+    print("newValue: ",newValue.x,newValue.y,newValue.z);
+    position += newValue;
+    print("setPosition: ",position.x,position.y,position.z);
     updateViewMatrix();
 }
 
