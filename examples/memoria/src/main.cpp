@@ -12,7 +12,6 @@
 #include <SDL2/SDL.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <iostream>
 
 void windowResize(SDL_Event &event, MyCamera &camera);
 MyCamera getDefaultCamera(const MyWindow &window);
@@ -52,13 +51,13 @@ int main() {
 
     return 0;
   } catch (const std::exception &e) {
-    printErr(e);
+    // printErr(e);
     return 1;
   }
 }
 
 MyCamera getDefaultCamera(const MyWindow &window) {
-  glm::vec3 position = {0.0, 20.0, 0.0};
+  glm::vec3 position = {0.0, 10.0, 0.0};
   glm::vec3 target = {0.0, 0.0, 0.0};
   glm::vec3 upDir = {0.0, 0.0, -1.0};
   float aspectRatio =

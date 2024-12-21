@@ -13,11 +13,11 @@ std::shared_ptr<MyMesh> createMeshFromModel(AssetsManager &assetsManager,
   return assetsManager.getModel(modelName + "Model");
 }
 
-std::shared_ptr<MyObject> createObject(const std::shared_ptr<MyMesh> &mesh,
-                                       const Material &material,
-                                       const std::shared_ptr<MyShader> &shader,
-                                       bool isTransparent, GLuint textureId,
-                                       int drawType) {
-  return std::make_shared<MyObject>(mesh, material, shader, isTransparent,
+std::shared_ptr<MyObject>
+createObject(const std::shared_ptr<MyMesh> &mesh, const Material &material,
+             const std::shared_ptr<MyShader> &shader,
+             const std::shared_ptr<MyShader> &shaderBox, bool isTransparent,
+             GLuint textureId, int drawType) {
+  return std::make_shared<MyObject>(mesh, material, shader, shaderBox, isTransparent,
                                     textureId, drawType);
 }

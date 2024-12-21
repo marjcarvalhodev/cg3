@@ -1,4 +1,6 @@
 #include "scene.hpp"
+#include "floor.hpp"
+
 #include <iostream>
 
 MyScene::MyScene(const MyCamera &camera, const GameGrid &grid)
@@ -116,7 +118,7 @@ void MyScene::handleMouseClick(int mouseX, int mouseY, const MyCamera &camera,
 void MyScene::initializeShaders(AssetsManager &assetsManager) {
 
   std::cout << "initializeShaders: inicio" << std::endl;
-  std::vector<std::string> shaderNames = {"phong", "glass", "fog"};
+  std::vector<std::string> shaderNames = {"basic", "phong", "glass", "fog"};
 
   for (const auto &name : shaderNames) {
     loadAndRegisterShader(assetsManager, name);
@@ -124,11 +126,6 @@ void MyScene::initializeShaders(AssetsManager &assetsManager) {
     std::shared_ptr<MyShader> shader = assetsManager.getShader(shaderName);
     addSceneShaders(shaderName, shader);
   }
-
-  // auto fogShader = assetsManager.getShader("fogShader");
-  // fogShader->setUniform("fogStart", 5.0f);
-  // fogShader->setUniform("fogEnd", 20.0f);
-  // fogShader->setUniform("fogColor", glm::vec3(0.5f, 0.5f, 0.5f));
 
   std::cout << "initializeShaders: fim" << std::endl;
 }
@@ -141,15 +138,24 @@ void MyScene::initializeModels(AssetsManager &assetsManager) {
     addSceneMeshes(name, mesh);
   }
   std::cout << "initializeModels: inicio" << std::endl;
-  // MeshData floorMeshData = createMeshDataFromVertices(floorVertices);
-  // meshes["floor"] = std::make_shared<MyMesh>(floorMeshData);
+
+  MeshData floorMeshData = createMeshDataFromVertices(floorVertices);
+  std::shared_ptr<MyMesh> floorMesh = std::make_shared<MyMesh>(floorMeshData);
+  addSceneMeshes("floor", floorMesh);
 }
 
 void MyScene::initializeObjects(AssetsManager &assetsManager) {
   std::cout << "initializeObjects: inicio" << std::endl;
 
+  auto basicShader = getSceneShader("basicShader");
   auto phongShader = getSceneShader("phongShader");
   auto glassShader = getSceneShader("glassShader");
+
+  auto fogShader = getSceneShader("fogShader");
+  fogShader->setUniform("fogStart", 5.0f);
+  fogShader->setUniform("fogEnd", 20.0f);
+  fogShader->setUniform("fogColor", glm::vec3(0.5f, 0.5f, 0.5f));
+
   std::cout << "initializeObjects: pegou shaders" << std::endl;
 
   assetsManager.preloadAllTextures();
@@ -162,56 +168,59 @@ void MyScene::initializeObjects(AssetsManager &assetsManager) {
   Material floorMaterial = {{0.6f, 0.6f, 0.6f}, 32.0f};
   Material mat = {{0.5, 0.3, 0.36}, 50.0};
 
-  std::vector<
-      std::tuple<std::string, glm::vec3, std::shared_ptr<MyMesh>, Material,
-                 std::shared_ptr<MyShader>, bool, GLuint, int>>
-      objects = {
-          {"wood_ball",
-           {-2.0f, 0.0f, -2.0f},
-           getSceneMesh("ball"),
-           mat,
-           phongShader,
-           false,
-           woodTextureId,
-           GL_TRIANGLES},
-          {"normal_ball",
-           {-2.0f, 0.0f, 2.0f},
-           getSceneMesh("ball"),
-           mat,
-           phongShader,
-           false,
-           0,
-           GL_TRIANGLES},
-          {"shiny_diamond",
-           {2.0f, 0.0f, 2.0f},
-           getSceneMesh("diamond"),
-           mat,
-           glassShader,
-           true,
-           0,
-           GL_TRIANGLES},
-          {"rough_glass",
-           {2.0f, 0.0f, -2.0f},
-           getSceneMesh("diamond"),
-           mat,
-           glassShader,
-           false,
-           0,
-           GL_TRIANGLES}
-          //  {"floor",
-          //   {0.0f, 0.0f, 0.0f},
-          //   meshes.at("floor"),
-          //   floorMaterial,
-          //   phongShader,
-          //   false,
-          //   floorTextureId,
-          //   GL_TRIANGLES}
-      };
+  std::vector<std::tuple<std::string, glm::vec3, std::shared_ptr<MyMesh>,
+                         Material, std::shared_ptr<MyShader>,
+                         std::shared_ptr<MyShader>, bool, GLuint, int>>
+      objects = {{"wood_ball",
+                  {-2.0f, 0.0f, -2.0f},
+                  getSceneMesh("ball"),
+                  mat,
+                  phongShader,
+                  basicShader,
+                  false,
+                  woodTextureId,
+                  GL_TRIANGLES},
+                 {"normal_ball",
+                  {-2.0f, 0.0f, 2.0f},
+                  getSceneMesh("ball"),
+                  mat,
+                  fogShader,
+                  basicShader,
+                  false,
+                  0,
+                  GL_TRIANGLES},
+                 {"shiny_diamond",
+                  {2.0f, 0.0f, 2.0f},
+                  getSceneMesh("diamond"),
+                  mat,
+                  glassShader,
+                  basicShader,
+                  true,
+                  0,
+                  GL_TRIANGLES},
+                 {"rough_glass",
+                  {2.0f, 0.0f, -2.0f},
+                  getSceneMesh("diamond"),
+                  mat,
+                  glassShader,
+                  basicShader,
+                  false,
+                  0,
+                  GL_TRIANGLES},
+                 {"floor",
+                  {0.0f, 0.0f, 0.0f},
+                  getSceneMesh("floor"),
+                  floorMaterial,
+                  phongShader,
+                  nullptr,
+                  false,
+                  floorTextureId,
+                  GL_TRIANGLES}};
 
-  for (const auto &[name, position, mesh, material, shader, isTransparent,
-                    textureId, drawType] : objects) {
-    auto object = createObject(mesh, material, shader, isTransparent, textureId,
-                               drawType);
+  for (const auto &[name, position, mesh, material, shader, shaderBox,
+                    isTransparent, textureId, drawType] : objects) {
+    auto object = createObject(mesh, material, shader, shaderBox, isTransparent,
+                               textureId, drawType);
     object->repositionObject(position);
     addSceneObjects(name, object);
   }

@@ -90,6 +90,7 @@ public:
                         int windowWidth, int windowHeight);
 
   void moveCamera(MyCamera &camera, const glm::vec3 &direction) {
+    std::cout << "Direction: " << direction.x << ", " << direction.y << ", " << direction.z << std::endl;
     camera.translate(direction);
   }
 

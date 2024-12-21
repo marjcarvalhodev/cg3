@@ -40,7 +40,7 @@ public:
 
   void translate(const glm::vec3 &offset) {
     position += offset;
-    updateViewMatrix(); // Recalculate the view matrix after moving
+    updateViewMatrix();
   }
 };
 

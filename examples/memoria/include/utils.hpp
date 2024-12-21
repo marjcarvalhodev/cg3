@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
-inline void printErr(const std::exception &e) {
-  std::cerr << "Error: " << e.what() << std::endl;
-}
+// inline void printErr(const std::exception &e) {
+//   std::cerr << "Error: " << e.what() << std::endl;
+// }
 
 // Variadic template function for printing multiple arguments
 template <typename T, typename... Args>
@@ -97,31 +97,28 @@ inline MeshData createMeshDataFromVertices(const std::vector<float> &vertices) {
 }
 
 inline MeshData createBoundingBoxMeshData(const glm::vec4 corners[8]) {
-  MeshData meshData;
+    MeshData meshData;
 
-  // Add vertices
-  for (const auto &corner : corners) {
-    meshData.vertices.push_back(corner.x);
-    meshData.vertices.push_back(corner.y);
-    meshData.vertices.push_back(corner.z);
+    // Define indices for the edges of a cube
+    const unsigned int indices[] = {
+        0, 1, 1, 3, 3, 2, 2, 0, // Bottom face
+        4, 5, 5, 7, 7, 6, 6, 4, // Top face
+        0, 4, 1, 5, 2, 6, 3, 7  // Connecting edges
+    };
 
-    // Add dummy normals and tex coords (not used for lines)
-    meshData.normals.push_back(0.0f);
-    meshData.normals.push_back(0.0f);
-    meshData.normals.push_back(0.0f);
+    // Add vertices to the MeshData
+    for (int i = 0; i < 8; ++i) {
+        meshData.vertices.push_back(corners[i].x);
+        meshData.vertices.push_back(corners[i].y);
+        meshData.vertices.push_back(corners[i].z);
+    }
 
-    meshData.texCoords.push_back(0.0f);
-    meshData.texCoords.push_back(0.0f);
-  }
+    // Add indices to the MeshData
+    for (unsigned int index : indices) {
+        meshData.indices.push_back(index);
+    }
 
-  // Add indices for lines
-  meshData.indices = {
-      0, 1, 1, 5, 5, 4, 4, 0, // Bottom face
-      2, 3, 3, 7, 7, 6, 6, 2, // Top face
-      0, 2, 1, 3, 5, 7, 4, 6  // Vertical edges
-  };
-
-  return meshData;
+    return meshData;
 }
 
 inline std::vector<float> initGridlines(GameGrid &grid) {

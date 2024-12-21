@@ -15,6 +15,7 @@ private:
   std::shared_ptr<MyMesh> meshBox;
   Material material;
   std::shared_ptr<MyShader> shader;
+  std::shared_ptr<MyShader> shaderBox;
   GLuint textureId;
   int drawType;
   glm::mat4 modelMatrix;
@@ -22,13 +23,15 @@ private:
   glm::vec3 boundingBoxMax;
   std::vector<glm::vec4> boundingBoxCorners;
   std::vector<float> boundingBoxVertices;
+
   void updateBoundingBox(const glm::vec3 &meshMin, const glm::vec3 &meshMax);
 
 public:
   bool isTransparent;
 
-  MyObject(std::shared_ptr<MyMesh> mesh, const Material &material,
-           std::shared_ptr<MyShader> shader, bool isTransparent = false,
+  MyObject(std::shared_ptr<MyMesh> mesh,
+           const Material &material, std::shared_ptr<MyShader> shader,
+           std::shared_ptr<MyShader> shaderBox, bool isTransparent = false,
            GLuint textureId = 0, int drawType = GL_TRIANGLES);
 
   ~MyObject();
@@ -54,4 +57,4 @@ public:
   virtual void onClick() { std::cout << "Object clicked!" << std::endl; }
 };
 
-#endif
+#endif // OBJECT_HPP

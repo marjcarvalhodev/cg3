@@ -1,15 +1,17 @@
 #include "object.hpp"
 
 MyObject::MyObject(std::shared_ptr<MyMesh> mesh, const Material &material,
-                   std::shared_ptr<MyShader> shader, bool isTransparent,
+                   std::shared_ptr<MyShader> shader,
+                   std::shared_ptr<MyShader> shaderBox, bool isTransparent,
                    GLuint textureId, int drawType)
-    : mesh(mesh), material(material), shader(shader),
-      modelMatrix(glm::mat4(1.0f)), isTransparent(isTransparent),
-      textureId(textureId), drawType(drawType) {
+    : mesh(mesh), material(material), shader(shader), shaderBox(shaderBox),
+      textureId(textureId), drawType(drawType), modelMatrix(glm::mat4(1.0f)),
+      isTransparent(isTransparent) {
 
   updateBoundingBox(mesh->getMinBounds(), mesh->getMaxBounds());
 
-  MeshData meshData
+  MeshData meshData = createBoundingBoxMeshData(boundingBoxCorners.data());
+  meshBox = std::make_shared<MyMesh>(meshData);
 }
 
 MyObject::~MyObject() {}
@@ -38,11 +40,29 @@ void MyObject::render(const glm::mat4 &view, const glm::mat4 &projection,
   shader->setUniform("materialColor", material.color);
   shader->setUniform("materialShininess", material.shininess);
 
+  shader->setUniform("time", SDL_GetTicks() / 1000.0f); // Time in seconds
+  shader->setUniform("fogColor", glm::vec3(0.5f, 0.5f, 0.5f));
+  shader->setUniform("fogStart", 5.0f);
+  shader->setUniform("fogEnd", 20.0f);
+
   // Bind and draw the mesh
   mesh->bind();
   glDrawElements(drawType, mesh->getIndexCount(), GL_UNSIGNED_INT, 0);
   mesh->unbind();
+
+  // Render the bounding box
+  if (meshBox && shaderBox) {
+    shaderBox->use(); // Activate the shader for the bounding box
+    shaderBox->updateShader(modelMatrix, view, projection, lightPos, cameraPos,
+                            glm::vec3(1.0f, 0.0f, 0.0f));
+
+    meshBox->bind();
+    glDrawElements(GL_LINES, meshBox->getIndexCount(), GL_UNSIGNED_INT, 0);
+    meshBox->unbind();
+  }
 }
+
+void
 
 void MyObject::repositionObject(glm::vec3 newPosition) {
   setModelMatrix(glm::translate(glm::mat4(1.0f), newPosition));
